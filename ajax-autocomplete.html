@@ -6,43 +6,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
     <title>Ajax Auto Complete</title>
-
+    <style>
+        .search-result {
+            position: absolute;
+            background: aliceblue;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Ajax Auto Complete!</h1>
-    </div>
+<div class="container">
+    <h1>Ajax Auto Complete!</h1>
 
-    <input type="text" size="30" onkeyup="showResult(this.value)">
-    <div id="livesearch"></div>
+    <input id="globalSearch" name="global-search" type="text" size="30">
+    <div id="searchResult" class="search-result"></div>
+    <div class="">Text Area</div>
+</div>
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script>
-    function showResult(str) {
-        if (str.length==0) {
-            document.getElementById("livesearch").innerHTML="";
-            return;
+
+    $("#globalSearch").keyup(function () {
+        var search = $('#globalSearch').val();
+        showResult(search, 0);
+    });
+
+    function showResult(search, lang) {
+        if (search.length > 0) {
+            /* get treehouse profile info via JSON */
+            $.getJSON("http://www.wagner-group.com/?eID=wproducts_suggest&a[l]=" + search + "&lang=" + lang, function (data) {
+                $("#searchResult").html('<ul>');
+                var output = "";
+                /* loop through the JSON, parse out badge name & icon wrap it in some HTML. */
+                if(data.docs.length){
+                    for (var i in data.docs) {
+                        output += "<li>";
+                        output += "<a href='#'>";
+                        output += data.docs[i].title;
+                        output += "</a>";
+                        output += "</li>";
+                    }
+                    $("#searchResult ul").append(output); // append li
+                    $("#searchResult ul").append('</ul>'); // close list
+                }
+                else{
+                    output="no result found!"
+                }
+            });
+        } else {
+            $(".search-result").hide();
         }
-        if (window.XMLHttpRequest) {
-            // code for IE7+, Firefox, Chrome, Opera, Safari
-            xmlhttp=new XMLHttpRequest();
-        } else {  // code for IE6, IE5
-            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        xmlhttp.onreadystatechange=function() {
-            if (this.readyState==4 && this.status==200) {
-                document.getElementById("livesearch").innerHTML=this.responseText;
-            }
-        }
-        xmlhttp.open("GET","https://www.wagner-group.com/?eID=wproducts_suggest&a[l]="+str+"&lang=0",true);
-        xmlhttp.send();
     }
 </script>
 </body>
